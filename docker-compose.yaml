@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+    chrome:
+      image: selenium/standalone-chrome:3.141.59-20200326
+      volumes:
+        - /dev/shm:/dev/shm
+      ports:
+        - "4444:4444"

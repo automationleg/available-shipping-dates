@@ -24,7 +24,7 @@ next_days = (By.CLASS_NAME, 'ts-next')
 
 def set_chrome_options() -> Options:
     chrome_options = Options()
-    # chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-infobars')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
@@ -36,7 +36,8 @@ def set_chrome_options() -> Options:
 
 
 def initialize_browser():
-    browser = webdriver.Chrome(options=set_chrome_options())
+    # browser = webdriver.Chrome(options=set_chrome_options())
+    browser = webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', options=set_chrome_options())
 
     return browser
 
