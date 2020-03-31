@@ -35,11 +35,11 @@ def set_chrome_options() -> Options:
     return chrome_options
 
 
-def initialize_browser():
-    # browser = webdriver.Chrome(options=set_chrome_options())
-    browser = webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', options=set_chrome_options())
-
-    return browser
+def initialize_browser(remote):
+    if remote:
+        return webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', options=set_chrome_options())
+    else:
+        return webdriver.Chrome(options=set_chrome_options())
 
 
 def wait_until_visible(webdriver, wait_time, *locator, error_message=''):
@@ -129,10 +129,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("available-schedules")
     parser.add_argument("-u", "--user", type=str, help="Login User Name")
     parser.add_argument("-p", "--password", type=str, help="Login Password")
+    parser.add_argument("-r", "--remote", default=False, action="store_true", help="Webdriver Remote. default=False")
+
     args = parser.parse_args()
 
     pd.options.display.width = 0
-    browser = initialize_browser()
+    browser = initialize_browser(remote=args.remote)
 
     browser.get('https://apimarket.pl/')
     time.sleep(2)
