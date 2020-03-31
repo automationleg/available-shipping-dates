@@ -12,6 +12,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import argparse
+import requests
 
 
 login_header = (By.XPATH, '//h3[text()="Masz już konto?"]')
@@ -130,6 +131,7 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--user", type=str, help="Login User Name")
     parser.add_argument("-p", "--password", type=str, help="Login Password")
     parser.add_argument("-r", "--remote", default=False, action="store_true", help="Webdriver Remote. default=False")
+    parser.add_argument("-ip", "--ipaddress", type=str, help="IP address of service to notify")
 
     args = parser.parse_args()
 
@@ -151,7 +153,12 @@ if __name__ == "__main__":
 
     print(schedule)
 
+    # notify external service
     available_dates = check_deliveries_within(schedule, days=14)
+    if available_dates:
+        requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'ON')
+    else:
+        requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'OFF')
 
     browser.quit()
 
