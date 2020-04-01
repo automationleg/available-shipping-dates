@@ -74,8 +74,8 @@ def enter_zip_code(zipcode):
 
 def change_schedule_table(df):
     updated_sched = df.copy(deep=True)
-    updated_sched.replace(to_replace=r'.*Cena dostawy.*', value='niedostepne', regex=True)
-    updated_sched.replace(to_replace=r'.*bezpłatna od.*', value='dostepne', regex=True)
+    updated_sched = updated_sched.replace(to_replace=r'.*Cena dostawy.*', value='niedostepne', regex=True)
+    updated_sched = updated_sched.replace(to_replace=r'.*bezpłatna od.*', value='dostepne', regex=True)
 
     return updated_sched
 
@@ -155,10 +155,11 @@ if __name__ == "__main__":
 
     # notify external service
     available_dates = check_deliveries_within(schedule, days=14)
-    if available_dates:
-        requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'ON')
-    else:
-        requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'OFF')
+    if hasattr(args, 'ip'):
+        if available_dates:
+            requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'ON')
+        else:
+            requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'OFF')
 
     browser.quit()
 
