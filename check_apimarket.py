@@ -154,9 +154,12 @@ if __name__ == "__main__":
     print(schedule)
 
     # notify external service
-    available_dates = check_deliveries_within(schedule, days=14)
+    available_dates = check_deliveries_within(schedule, days=65)
+    print(available_dates)
+    print(hasattr(args, 'ip'))
     if hasattr(args, 'ip'):
         if available_dates:
+            print('Available deliveries. Sending notificatoin')
             requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'ON')
         else:
             requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'OFF')
