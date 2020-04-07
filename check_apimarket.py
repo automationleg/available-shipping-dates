@@ -74,8 +74,8 @@ def enter_zip_code(zipcode):
 
 def change_schedule_table(df):
     updated_sched = df.copy(deep=True)
-    updated_sched = updated_sched.replace(to_replace=r'.*Cena dostawy.*', value='niedostepne', regex=True)
-    updated_sched = updated_sched.replace(to_replace=r'.*bezpłatna od.*', value='dostepne', regex=True)
+    updated_sched = updated_sched.replace(to_replace=r'.*Cena dostawy.*', value='dostepne', regex=True)
+    updated_sched = updated_sched.replace(to_replace=r'.*bezpłatna od.*', value='niedostepne', regex=True)
 
     return updated_sched
 
