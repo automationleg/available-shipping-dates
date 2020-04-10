@@ -17,6 +17,8 @@ import paramiko
 from paramiko import SSHClient
 from scp import SCPClient
 import os
+from browser import BasePage
+
 
 login_header = (By.XPATH, '//h3[text()="Masz już konto?"]')
 zip_popup_close = (By.XPATH, '//div[contains(@class, "fancybox-overlay")]//a[@title="Close"]')
@@ -39,27 +41,12 @@ def set_chrome_options() -> Options:
     return chrome_options
 
 
-def initialize_browser(remote):
-    if remote:
-        return webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', options=set_chrome_options())
-    else:
-        return webdriver.Chrome(options=set_chrome_options())
-
-
-def wait_until_visible(webdriver, wait_time, *locator, error_message=''):
-    return WebDriverWait(webdriver, wait_time).until(
-        EC.visibility_of_all_elements_located(*locator),
-        message=f'{error_message}\n'
-        f'Details: Element with the following locator "{locator}" was not displayed within {wait_time} seconds'
-    )
-
-
 def login(username, password):
     login = browser.find_element_by_class_name('login')
     login.click()
 
     # wait for login form
-    wait_until_visible(browser, 10, login_header)
+    browser.wait_until_visible(10, login_header)
 
     email_field = browser.find_element_by_id('email').send_keys(username)
     pass_field = browser.find_element_by_id('passwd').send_keys(password)
@@ -84,16 +71,16 @@ def change_schedule_table(df):
 
 
 def get_available_schedule():
-    terminy = wait_until_visible(browser, 10, terminy_dostaw)
+    terminy = browser.wait_until_visible(10, terminy_dostaw)
     terminy[0].click()
-    popup = wait_until_visible(browser, 5, times_table_popup)
+    popup = browser.wait_until_visible(5, times_table_popup)
 
     schedule = dump_table_from_webpage(popup[0].get_attribute('innerHTML'))
     return change_schedule_table(schedule)
 
 
 def take_schedule_screenshot():
-    popup = wait_until_visible(browser, 5, times_table_popup)
+    popup = browser.wait_until_visible(5, times_table_popup)
 
     return popup[0].screenshot_as_png
 
@@ -132,8 +119,7 @@ def dump_table_from_webpage(page_source):
 def send_file_to_openhab(filename, hostname):
     ssh = SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    print(hostname)
-    print(filename)
+
     ssh.connect(hostname, username='vagrant')
 
     # SCPCLient takes a paramiko transport as an argument
@@ -143,21 +129,13 @@ def send_file_to_openhab(filename, hostname):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser("available-schedules")
-    # parser.add_argument("-u", "--user", type=str, help="Login User Name")
-    # parser.add_argument("-p", "--password", type=str, help="Login Password")
-    # parser.add_argument("-r", "--remote", default=False, action="store_true", help="Webdriver Remote. default=False")
-    # parser.add_argument("-n", "--notifip", type=str, help="IP address of service to notify")
-
-    # args = parser.parse_args()
-    # print(args)
-    # get params from env variables
     username = os.environ.get('ARG_USERNAME')
     password = os.environ.get('ARG_PASSWORD')
     notifip = os.environ.get('ARG_NOTIFIP')
 
     pd.options.display.width = 0
-    browser = initialize_browser(remote=False)
+
+    browser = BasePage(set_chrome_options(), remote=False)
 
     browser.get('https://apimarket.pl/')
     time.sleep(2)
