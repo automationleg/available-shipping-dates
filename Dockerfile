@@ -39,4 +39,4 @@ ENV ARG_USERNAME $username
 ENV ARG_PASSWORD $password 
 ENV ARG_NOTIFIP $notifip 
 
-CMD [ "python", "check_apimarket.py", "-u", "$ARG_USERNAME", "-p", "${ARG_PASSWORD}", "-n", "${ARG_NOTIFIP}" ]
+CMD [ "python", "check_apimarket.py" ]
