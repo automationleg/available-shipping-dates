@@ -16,7 +16,7 @@ import requests
 import paramiko
 from paramiko import SSHClient
 from scp import SCPClient
-
+import os
 
 login_header = (By.XPATH, '//h3[text()="Masz już konto?"]')
 zip_popup_close = (By.XPATH, '//div[contains(@class, "fancybox-overlay")]//a[@title="Close"]')
@@ -143,23 +143,28 @@ def send_file_to_openhab(filename, hostname):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("available-schedules")
-    parser.add_argument("-u", "--user", type=str, help="Login User Name")
-    parser.add_argument("-p", "--password", type=str, help="Login Password")
-    parser.add_argument("-r", "--remote", default=False, action="store_true", help="Webdriver Remote. default=False")
-    parser.add_argument("-n", "--notifip", type=str, help="IP address of service to notify")
+    # parser = argparse.ArgumentParser("available-schedules")
+    # parser.add_argument("-u", "--user", type=str, help="Login User Name")
+    # parser.add_argument("-p", "--password", type=str, help="Login Password")
+    # parser.add_argument("-r", "--remote", default=False, action="store_true", help="Webdriver Remote. default=False")
+    # parser.add_argument("-n", "--notifip", type=str, help="IP address of service to notify")
 
-    args = parser.parse_args()
-    print(args)
+    # args = parser.parse_args()
+    # print(args)
+    # get params from env variables
+    username = os.environ.get('ARG_USERNAME')
+    password = os.environ.get('ARG_PASSWORD')
+    notifip = os.environ.get('ARG_NOTIFIP')
+
     pd.options.display.width = 0
-    browser = initialize_browser(remote=args.remote)
+    browser = initialize_browser(remote=False)
 
     browser.get('https://apimarket.pl/')
     time.sleep(2)
     enter_zip_code('05510')
 
     # login
-    login(args.user, args.password)
+    login(username, password)
     time.sleep(2)
     schedule = get_available_schedule()
 
@@ -173,15 +178,15 @@ if __name__ == "__main__":
 
     # notify external service
     available_dates = check_deliveries_within(schedule, days=65)
-    if args.notifip is not None:
+    if notifip is not None:
         # update image with schedule
-        send_file_to_openhab(filename=image_file, hostname=args.notifip)
+        send_file_to_openhab(filename=image_file, hostname=notifip)
 
         if available_dates:
             print('Available deliveries. Sending notification')
-            requests.put(f'http://{args.notifip}:8080/rest/items/api/state', 'ON')
+            requests.put(f'http://{notifip}:8080/rest/items/api/state', 'ON')
         else:
-            requests.put(f'http://{args.notifip}:8080/rest/items/api/state', 'OFF')
+            requests.put(f'http://{notifip}:8080/rest/items/api/state', 'OFF')
 
 
 
