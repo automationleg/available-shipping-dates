@@ -20,6 +20,8 @@ import os
 
 
 frisco_url = 'https://www.frisco.pl/'
+info_popup = (By.CSS_SELECTOR, 'div.fixed-popup.image-popup')
+close_info_popup = (By.CSS_SELECTOR, 'a.close img')
 zaloguj_sie = (By.XPATH, '//a[@class="button cta" and contains(.,"Zaloguj się")]')
 login_popup = (By.XPATH, '//div[@class="popup_box login"]')
 email = (By.CSS_SELECTOR, 'input[name="username"]')
@@ -33,6 +35,11 @@ class Frisco:
     def __init__(self, driver: webdriver):
         self.browser = driver
 
+    def get_page(self):
+        self.browser.get(frisco_url)
+
     def login(self, username, password):
         pass
+
+
 
