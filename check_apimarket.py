@@ -155,7 +155,7 @@ if __name__ == "__main__":
     browser.quit()
 
     # notify external service
-    available_dates = check_deliveries_within(schedule, days=65)
+    available_dates = check_deliveries_within(schedule, days=14)
     if args.ipaddress is not None:
         if available_dates:
             print('Available deliveries. Sending notification')
