@@ -13,6 +13,9 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import argparse
 import requests
+import paramiko
+from paramiko import SSHClient
+from scp import SCPClient
 
 
 login_header = (By.XPATH, '//h3[text()="Masz już konto?"]')
@@ -127,11 +130,10 @@ def dump_table_from_webpage(page_source):
 
 
 def send_file_to_openhab(filename, hostname):
-    from paramiko import SSHClient
-    from scp import SCPClient
-
     ssh = SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    print(hostname)
+    print(filename)
     ssh.connect(hostname, username='vagrant')
 
     # SCPCLient takes a paramiko transport as an argument
@@ -145,10 +147,10 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--user", type=str, help="Login User Name")
     parser.add_argument("-p", "--password", type=str, help="Login Password")
     parser.add_argument("-r", "--remote", default=False, action="store_true", help="Webdriver Remote. default=False")
-    parser.add_argument("-ip", "--ipaddress", type=str, help="IP address of service to notify")
+    parser.add_argument("-n", "--notifip", type=str, help="IP address of service to notify")
 
     args = parser.parse_args()
-
+    print(args)
     pd.options.display.width = 0
     browser = initialize_browser(remote=args.remote)
 
@@ -162,7 +164,8 @@ if __name__ == "__main__":
     schedule = get_available_schedule()
 
     image = take_schedule_screenshot()
-    with open('api_schedule.png', 'wb') as f:
+    image_file = 'api_schedule.png'
+    with open(image_file, 'wb') as f:
         f.write(image)
 
     print(schedule)
@@ -170,15 +173,15 @@ if __name__ == "__main__":
 
     # notify external service
     available_dates = check_deliveries_within(schedule, days=65)
-    if args.ipaddress is not None:
+    if args.notifip is not None:
         # update image with schedule
-        send_file_to_openhab(filename=image, hostname=args.ipaddress)
+        send_file_to_openhab(filename=image_file, hostname=args.notifip)
 
         if available_dates:
             print('Available deliveries. Sending notification')
-            requests.put(f'http://{args.ipaddress}:8080/rest/items/api/state', 'ON')
+            requests.put(f'http://{args.notifip}:8080/rest/items/api/state', 'ON')
         else:
-            requests.put(f'http://{args.ipaddress}:8080/rest/items/api/state', 'OFF')
+            requests.put(f'http://{args.notifip}:8080/rest/items/api/state', 'OFF')
 
 
 

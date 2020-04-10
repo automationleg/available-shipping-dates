@@ -2,8 +2,12 @@ FROM python:3.7
 
 ARG username
 ARG password
-ARG notificationip
+ARG notifip
 
+RUN mkdir /root/.ssh
+ADD id_rsa /root/.ssh/
+RUN chmod 600 /root/.ssh/id_rsa
+ 
 # We need wget to set up the PPA and xvfb to have a virtual screen and unzip to install the Chromedriver
 RUN apt-get install -y wget unzip
 
@@ -31,4 +35,8 @@ ADD requirements.txt /
 ADD check_apimarket.py /
 RUN pip install -r requirements.txt
 
-CMD [ "python", "./check_apimarket.py", "-u", "${username}", "-p", "${password}", "-ip", "${notificationip}" ]
+ENV ARG_USERNAME $username 
+ENV ARG_PASSWORD $password 
+ENV ARG_NOTIFIP $notifip 
+
+CMD [ "python", "check_apimarket.py", "-u", "$ARG_USERNAME", "-p", "${ARG_PASSWORD}", "-n", "${ARG_NOTIFIP}" ]
