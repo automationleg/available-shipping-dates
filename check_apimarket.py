@@ -126,6 +126,20 @@ def dump_table_from_webpage(page_source):
     return table_df[0]
 
 
+def send_file_to_openhab(filename, hostname):
+    from paramiko import SSHClient
+    from scp import SCPClient
+
+    ssh = SSHClient()
+    ssh.load_system_host_keys()
+    ssh.connect(hostname)
+
+    # SCPCLient takes a paramiko transport as an argument
+    scp = SCPClient(ssh.get_transport())
+
+    scp.put(filename, '/etc/openhab2/html/sklepy_charmonogram/')
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("available-schedules")
     parser.add_argument("-u", "--user", type=str, help="Login User Name")
@@ -155,8 +169,11 @@ if __name__ == "__main__":
     browser.quit()
 
     # notify external service
-    available_dates = check_deliveries_within(schedule, days=14)
+    available_dates = check_deliveries_within(schedule, days=65)
     if args.ipaddress is not None:
+        # update image with schedule
+        send_file_to_openhab(filename=image, hostname=args.ipaddress)
+
         if available_dates:
             print('Available deliveries. Sending notification')
             requests.put(f'http://{args.ipaddress}:8080/rest/items/api/state', 'ON')
