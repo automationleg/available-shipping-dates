@@ -152,17 +152,16 @@ if __name__ == "__main__":
         f.write(image)
 
     print(schedule)
+    browser.quit()
 
     # notify external service
     available_dates = check_deliveries_within(schedule, days=65)
-    print(available_dates)
-    print(hasattr(args, 'ip'))
-    if hasattr(args, 'ip'):
+    if args.ipaddress is not None:
         if available_dates:
-            print('Available deliveries. Sending notificatoin')
-            requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'ON')
+            print('Available deliveries. Sending notification')
+            requests.post(f'http://{args.ipaddress}:8080/rest/items/api/state', 'ON')
         else:
-            requests.post(f'http://{args.ip}:8080/rest/items/api/state', 'OFF')
+            requests.post(f'http://{args.ipaddress}:8080/rest/items/api/state', 'OFF')
 
-    browser.quit()
+
 
