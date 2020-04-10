@@ -33,6 +33,7 @@ ENV PATH $CHROMEDRIVER_DIR:$PATH
 
 ADD requirements.txt /
 ADD check_apimarket.py /
+ADD browser.py /
 RUN pip install -r requirements.txt
 
 ENV ARG_USERNAME $username 
