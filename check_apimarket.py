@@ -159,9 +159,9 @@ if __name__ == "__main__":
     if args.ipaddress is not None:
         if available_dates:
             print('Available deliveries. Sending notification')
-            requests.post(f'http://{args.ipaddress}:8080/rest/items/api/state', 'ON')
+            requests.put(f'http://{args.ipaddress}:8080/rest/items/api/state', 'ON')
         else:
-            requests.post(f'http://{args.ipaddress}:8080/rest/items/api/state', 'OFF')
+            requests.put(f'http://{args.ipaddress}:8080/rest/items/api/state', 'OFF')
 
 
 
