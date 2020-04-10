@@ -155,7 +155,7 @@ if __name__ == "__main__":
     browser.quit()
 
     # notify external service
-    available_dates = check_deliveries_within(schedule, days=65)
+    available_dates = check_deliveries_within(schedule, days=14)
     if notifip is not None:
         # update image with schedule
         send_file_to_openhab(filename=image_file, hostname=notifip)
