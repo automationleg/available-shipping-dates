@@ -156,10 +156,10 @@ if __name__ == "__main__":
 
     # notify external service
     available_dates = check_deliveries_within(schedule, days=14)
-    if notifip is not None:
-        # update image with schedule
-        send_file_to_openhab(filename=image_file, hostname=notifip)
+    # update image with schedule
+    send_file_to_openhab(filename=image_file, hostname=notifip)
 
+    if notifip is not None:
         if available_dates:
             print('Available deliveries. Sending notification')
             requests.put(f'http://{notifip}:8080/rest/items/api/state', 'ON')
