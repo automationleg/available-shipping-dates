@@ -62,6 +62,6 @@ if __name__ == "__main__":
     driver = initialize_webdriver()
     frisco = Frisco()
     frisco.get_page()
-    frisco.login('krzysztof_rrr@wp.pl', 'EdekFruniak2')
+    frisco.login(username, password)
 
     frisco.quit()
