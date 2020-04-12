@@ -17,6 +17,7 @@ from paramiko import SSHClient
 from scp import SCPClient
 import os
 from browser import BasePage
+from frisco_schedule import Frisco
 
 
 login_header = (By.XPATH, '//h3[text()="Masz już konto?"]')
@@ -129,12 +130,28 @@ if __name__ == "__main__":
     # update image with schedule
     send_file_to_openhab(filename=image_file, hostname=notifip)
 
+
+    # execute for frisco
+    frisco = Frisco()
+    frisco.get_page()
+    frisco.login(username, password)
+
+    # check reservation
+    frisco.reservation()
+
+    #send file
+    send_file_to_openhab('frisco_schedule.png', notifip)
+
+    frisco.quit()
+
     if notifip is not None:
         if available_dates:
             print('Available deliveries. Sending notification')
             requests.put(f'http://{notifip}:8080/rest/items/api/state', 'ON')
+            requests.put(f'http://{notifip}:8080/rest/items/frisco/state', 'ON')
         else:
             requests.put(f'http://{notifip}:8080/rest/items/api/state', 'OFF')
+            requests.put(f'http://{notifip}:8080/rest/items/frisco/state', 'OFF')
 
 
 
