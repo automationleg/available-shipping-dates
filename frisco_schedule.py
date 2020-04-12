@@ -18,6 +18,7 @@ from paramiko import SSHClient
 from scp import SCPClient
 import os
 from browser import BasePage
+from browser import *
 
 
 frisco_url = 'https://www.frisco.pl/'
@@ -51,7 +52,6 @@ class Frisco(BasePage):
 
         self.find_element(*submit).click()
         self.driver.wait_until_element_visible(10, logged_surname)
-
 
 if __name__ == "__main__":
     username = os.environ.get('ARG_USERNAME')
