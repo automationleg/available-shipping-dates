@@ -59,7 +59,6 @@ if __name__ == "__main__":
     password = os.environ.get('ARG_PASSWORD')
     notifip = os.environ.get('ARG_NOTIFIP')
 
-    driver = initialize_webdriver()
     frisco = Frisco()
     frisco.get_page()
     frisco.login(username, password)
