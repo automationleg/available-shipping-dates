@@ -37,7 +37,7 @@ class Frisco(BasePage):
 
 
     def get_page(self):
-        self.driver.get(frisco_url)
+        self.get(frisco_url)
         self.wait_until_visible(10,info_popup)
         close_elem = self.wait_until_element_visible(5, close_info_popup)
         close_elem.click()
@@ -46,12 +46,12 @@ class Frisco(BasePage):
     def login(self, username, password):
         self.wait_until_element_visible(10, zaloguj_sie).click()
         self.wait_until_element_visible(10, login_popup).click()        
-        email_elem = self.driver.find_element(*email_field)
-        pass_elem = self.driver.find_element(*password_field)
+        email_elem = self.find_element(*email_field)
+        pass_elem = self.find_element(*password_field)
         email_elem.send_keys(username)
         pass_elem.send_keys(password)
 
-        self.driver.find_element(*submit).click()
+        self.find_element(*submit).click()
         self.wait_until_element_visible(10, logged_surname)
 
 if __name__ == "__main__":
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     notifip = os.environ.get('ARG_NOTIFIP')
 
     driver = initialize_webdriver()
-    frisco = Frisco(driver)
+    frisco = Frisco()
     frisco.get_page()
     frisco.login('krzysztof_rrr@wp.pl', 'EdekFruniak2')
 
