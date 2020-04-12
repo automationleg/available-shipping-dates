@@ -10,14 +10,14 @@ class BasePage(webdriver.Chrome):
         self.driver = driver
 
     def wait_until_visible(self, wait_time, *locator, error_message=''):
-        return WebDriverWait(self, wait_time).until(
+        return WebDriverWait(self.driver, wait_time).until(
             EC.visibility_of_all_elements_located(*locator),
             message=f'{error_message}\n'
             f'Details: Element with the following locator "{locator}" was not displayed within {wait_time} seconds'
         )
 
     def wait_until_element_visible(self, wait_time, *locator, error_message=''):
-        return WebDriverWait(self, wait_time).until(
+        return WebDriverWait(self.driver, wait_time).until(
             EC.visibility_of_element_located(*locator),
             message=f'{error_message}\n'
             f'Details: Element with the following locator "{locator}" was not displayed within {wait_time} seconds'
@@ -25,13 +25,13 @@ class BasePage(webdriver.Chrome):
 
 def initialize_webdriver(remote=False):
     if remote:
-        webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', options=set_chrome_options())
+        return webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', options=set_chrome_options())
     else:
-        webdriver.Chrome(options=set_chrome_options())
+        return webdriver.Chrome(options=set_chrome_options())
 
 def set_chrome_options() -> Options:
     chrome_options = Options()
-    chrome_options.add_argument('--headless')
+    # chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-infobars')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
