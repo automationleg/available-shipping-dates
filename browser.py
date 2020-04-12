@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+import pandas as pd
+from bs4 import BeautifulSoup
 
 
 class BasePage(webdriver.Chrome):
@@ -23,11 +25,27 @@ class BasePage(webdriver.Chrome):
             f'Details: Element with the following locator "{locator}" was not displayed within {wait_time} seconds'
         )
 
+    def dump_table_from_webpage(self, page_source):
+        """
+        Dumps whole table displayed on webpage into a pandas DataFrame
+        :return: table as DataFrame object
+        """
+        page_soup = BeautifulSoup(page_source, 'lxml')
+        assert page_soup, 'Was not able to dump page source data!'
+
+        first_table = page_soup.find_all('table')[0]
+        table_df = pd.read_html(str(first_table))
+
+        # pandas data frame representation of table
+        return table_df[0]    
+
+
 def initialize_webdriver(remote=False):
     if remote:
         return webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', options=set_chrome_options())
     else:
         return webdriver.Chrome(options=set_chrome_options())
+
 
 def set_chrome_options() -> Options:
     chrome_options = Options()
