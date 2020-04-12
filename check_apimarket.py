@@ -127,6 +127,11 @@ def send_file_to_openhab(filename, hostname):
 
     scp.put(filename, '/etc/openhab2/html/sklepy_charmonogram/')
 
+def initialize_webdriver(remote=False):
+    if remote:
+            webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', options=options)
+        else:
+            webdriver.Chrome(self, options=options)
 
 if __name__ == "__main__":
     username = os.environ.get('ARG_USERNAME')
@@ -135,7 +140,7 @@ if __name__ == "__main__":
 
     pd.options.display.width = 0
 
-    browser = BasePage(set_chrome_options(), remote=False)
+    browser = BasePage(initialize_webdriver())
 
     browser.get('https://apimarket.pl/')
     time.sleep(2)
