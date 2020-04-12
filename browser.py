@@ -37,7 +37,10 @@ class BasePage(webdriver.Chrome):
         table_df = pd.read_html(str(first_table))
 
         # pandas data frame representation of table
-        return table_df[0]    
+        return table_df[0]
+    
+    def take_screenshot_of_element(self, element):
+        return element.screenshot_as_png
 
 
 def initialize_webdriver(remote=False):

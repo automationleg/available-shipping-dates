@@ -31,6 +31,9 @@ password_field = (By.ID, 'loginPassword')
 submit = (By.CSS_SELECTOR, 'input.button.cta.login.large')
 logged_surname = (By.XPATH, '//span[@class="surname" and contains(.,"Ramuk")]')
 reservation_btn = (By.CSS_SELECTOR, '.header_delivery-inner.with-chevron')
+edytuj_button = (By.XPATH, '//div[@class="button secondary cta" and contains(., "Edytuj")]')
+termin_dostawy_header = (By.XPATH, '//h4[contains(.,"Wybierz termin dostawy")]')
+schedule_panel = (By.XPATH, '//div[contains(@class, "reservation-selector_section delivery-reservation-box")]')
 
 
 class Frisco(BasePage):
@@ -54,6 +57,31 @@ class Frisco(BasePage):
         self.find_element(*submit).click()
         self.wait_until_element_visible(10, logged_surname)
 
+    def reservation(self):
+        self.wait_until_element_visible(10, reservation_btn).click()
+        time.sleep(5)
+        self.wait_until_element_visible(3, edytuj_button).click()
+        time.sleep(2)
+        schedule_elem = self.wait_until_element_visible(5, schedule_panel)
+        image = self.take_screenshot_of_element(schedule_elem)
+        image_file = 'frisco_schedule.png'
+        with open(image_file, 'wb') as f:
+            f.write(image)
+
+
+
+def send_file_to_openhab(filename, hostname):
+    ssh = SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    ssh.connect(hostname, username='vagrant')
+
+    # SCPCLient takes a paramiko transport as an argument
+    scp = SCPClient(ssh.get_transport())
+
+    scp.put(filename, '/etc/openhab2/html/sklepy_charmonogram/')
+
+
 if __name__ == "__main__":
     username = os.environ.get('ARG_USERNAME')
     password = os.environ.get('ARG_PASSWORD')
@@ -62,5 +90,11 @@ if __name__ == "__main__":
     frisco = Frisco()
     frisco.get_page()
     frisco.login(username, password)
+
+    # check reservation
+    frisco.reservation()
+
+    #send file
+    send_file_to_openhab('frisco_schedule.png', notifip)
 
     frisco.quit()
