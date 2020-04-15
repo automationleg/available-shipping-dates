@@ -32,8 +32,9 @@ RUN unzip $CHROMEDRIVER_DIR/chromedriver* -d $CHROMEDRIVER_DIR
 ENV PATH $CHROMEDRIVER_DIR:$PATH
 
 ADD requirements.txt /
-ADD check_apimarket.py /
+ADD apimarket_schedule.py /
 ADD frisco_schedule.py /
+ADD check_schedules.py /
 ADD browser.py /
 RUN pip install -r requirements.txt
 
@@ -41,4 +42,4 @@ ENV ARG_USERNAME $username
 ENV ARG_PASSWORD $password 
 ENV ARG_NOTIFIP $notifip 
 
-CMD [ "python", "check_apimarket.py" ]
+CMD [ "python", "check_schedules.py" ]

@@ -10,16 +10,10 @@ import re
 # import lxml
 import pandas as pd
 from datetime import datetime, timedelta
-import argparse
-import requests
-import paramiko
-from paramiko import SSHClient
-from scp import SCPClient
-import os
 from browser import BasePage
-from frisco_schedule import Frisco
 
 
+apimarket_url = 'https://apimarket.pl/'
 login_header = (By.XPATH, '//h3[text()="Masz już konto?"]')
 zip_popup_close = (By.XPATH, '//div[contains(@class, "fancybox-overlay")]//a[@title="Close"]')
 submit_zip_code = (By.XPATH, '//div[contains(@class, "fancybox-overlay")]//button[@type="submit"]')
@@ -29,6 +23,10 @@ next_days = (By.CLASS_NAME, 'ts-next')
 
 
 class Apimarket(BasePage):
+
+    def get_page(self):
+        self.get(apimarket_url)
+        time.sleep(5)
 
     def login(self, username, password):
         login = self.find_element_by_class_name('login')
@@ -52,6 +50,8 @@ class Apimarket(BasePage):
 
 
     def change_schedule_table(self, df):
+        pd.options.display.width = 0
+
         updated_sched = df.copy(deep=True)
         updated_sched = updated_sched.replace(to_replace=r'.*Cena dostawy.*', value='dostepne', regex=True)
         updated_sched = updated_sched.replace(to_replace=r'.*bezpłatna od.*', value='niedostepne', regex=True)
@@ -65,6 +65,12 @@ class Apimarket(BasePage):
         popup = self.wait_until_visible(5, times_table_popup)
 
         schedule = self.dump_table_from_webpage(popup[0].get_attribute('innerHTML'))
+
+        image = self.take_schedule_screenshot()
+        image_file = 'api_schedule.png'
+        with open(image_file, 'wb') as f:
+            f.write(image)
+        
         return self.change_schedule_table(schedule)
 
 
@@ -85,73 +91,3 @@ class Apimarket(BasePage):
                                 ]
 
         return deliveries_in_period
-
-
-def send_file_to_openhab(filename, hostname):
-    ssh = SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-    ssh.connect(hostname, username='vagrant')
-
-    # SCPCLient takes a paramiko transport as an argument
-    scp = SCPClient(ssh.get_transport())
-
-    scp.put(filename, '/etc/openhab2/html/sklepy_charmonogram/')
-
-
-if __name__ == "__main__":
-    username = os.environ.get('ARG_USERNAME')
-    password = os.environ.get('ARG_PASSWORD')
-    notifip = os.environ.get('ARG_NOTIFIP')
-
-    pd.options.display.width = 0
-
-    browser = Apimarket()
-
-    browser.get('https://apimarket.pl/')
-    time.sleep(2)
-    browser.enter_zip_code('05510')
-
-    # login
-    browser.login(username, password)
-    time.sleep(2)
-    schedule = browser.get_available_schedule()
-
-    image = browser.take_schedule_screenshot()
-    image_file = 'api_schedule.png'
-    with open(image_file, 'wb') as f:
-        f.write(image)
-
-    print(schedule)
-    browser.quit()
-
-    # notify external service
-    available_dates = browser.check_deliveries_within(schedule, days=14)
-    # update image with schedule
-    send_file_to_openhab(filename=image_file, hostname=notifip)
-
-
-    # execute for frisco
-    frisco = Frisco()
-    frisco.get_page()
-    frisco.login(username, password)
-
-    # check reservation
-    frisco.reservation()
-
-    #send file
-    send_file_to_openhab('frisco_schedule.png', notifip)
-
-    frisco.quit()
-
-    if notifip is not None:
-        if available_dates:
-            print('Available deliveries. Sending notification')
-            requests.put(f'http://{notifip}:8080/rest/items/api/state', 'ON')
-            requests.put(f'http://{notifip}:8080/rest/items/frisco/state', 'ON')
-        else:
-            requests.put(f'http://{notifip}:8080/rest/items/api/state', 'OFF')
-            requests.put(f'http://{notifip}:8080/rest/items/frisco/state', 'OFF')
-
-
-

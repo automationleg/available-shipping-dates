@@ -63,6 +63,7 @@ class Frisco(BasePage):
         self.wait_until_element_visible(3, edytuj_button).click()
         time.sleep(2)
         schedule_elem = self.wait_until_element_visible(5, schedule_panel)
+        
         image = self.take_screenshot_of_element(schedule_elem)
         image_file = 'frisco_schedule.png'
         with open(image_file, 'wb') as f:
