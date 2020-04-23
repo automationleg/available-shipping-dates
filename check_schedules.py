@@ -41,7 +41,7 @@ if __name__ == "__main__":
     api.quit()
 
     # notify external service
-    available_dates = api.check_deliveries_within(schedule, days=14)
+    available_dates = api.check_deliveries_within(schedule, days=10, occurences=3)
     # update images with schedules
     send_file_to_openhab(filename='api_schedule.png', hostname=notifip)
 

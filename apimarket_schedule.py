@@ -80,9 +80,9 @@ class Apimarket(BasePage):
         return popup[0].screenshot_as_png
 
 
-    def check_deliveries_within(self, schedule: pd.DataFrame, days: int) -> pd.DataFrame:
+    def check_deliveries_within(self, schedule: pd.DataFrame, days: int, occurences: int = 1) -> pd.DataFrame:
         possible_deliveries = [column for column in schedule.columns[1:] if
-                            schedule[column].str.contains('dostepne').any()]
+                               schedule[column].value_counts()['dostepne'] >= occurences]
         possible_deliveries_dt = [datetime.strptime(delivery_date.split()[1] + '.2020', '%d.%m.%Y') for delivery_date in
                                 possible_deliveries]
         deliveries_in_period = [delivery_date
