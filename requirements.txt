@@ -3,5 +3,5 @@ beautifulsoup4
 selenium
 pandas
 requests
-scp==0.13.2
+scp
 gazpacho

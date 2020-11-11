@@ -36,7 +36,8 @@ ADD apimarket_schedule.py /
 ADD frisco_schedule.py /
 ADD check_schedules.py /
 ADD browser.py /
-RUN pip install -r requirements.txt
+RUN python -m pip install --upgrade pip
+RUN pip install -r requirements.txt --use-feature=2020-resolver
 
 ENV ARG_USERNAME $username 
 ENV ARG_PASSWORD $password 
