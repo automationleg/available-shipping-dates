@@ -40,8 +40,8 @@ if __name__ == "__main__":
     print(schedule)
     api.quit()
 
-    # notify external service
-    available_dates = api.check_deliveries_within(schedule, days=10, occurences=3)
+    # get available dates
+    # available_dates = api.check_deliveries_within(schedule, days=10, occurences=3)
     # update images with schedules
     send_file_to_openhab(filename='api_schedule.png', hostname=notifip)
 
@@ -54,6 +54,8 @@ if __name__ == "__main__":
     # check reservation
     frisco.reservation()
 
+    # check frisco available reservation dates
+    available_dates = frisco.get_available_dates_within(days=14)
     #send file
     send_file_to_openhab('frisco_schedule.png', notifip)
 
@@ -63,10 +65,10 @@ if __name__ == "__main__":
     if notifip is not None:
         if available_dates:
             print('Available deliveries. Sending notification')
-            requests.put(f'http://{notifip}:8080/rest/items/api/state', 'ON')
+            # requests.put(f'http://{notifip}:8080/rest/items/api/state', 'ON')
             requests.put(f'http://{notifip}:8080/rest/items/frisco/state', 'ON')
         else:
-            requests.put(f'http://{notifip}:8080/rest/items/api/state', 'OFF')
+            # requests.put(f'http://{notifip}:8080/rest/items/api/state', 'OFF')
             requests.put(f'http://{notifip}:8080/rest/items/frisco/state', 'OFF')
 
 

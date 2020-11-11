@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 import time
 import re
 import pandas as pd
-# import lxml
+import lxml
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import argparse
@@ -19,6 +19,7 @@ from scp import SCPClient
 import os
 from browser import BasePage
 from browser import *
+from gazpacho import Soup
 
 
 frisco_url = 'https://www.frisco.pl/'
@@ -29,8 +30,9 @@ login_popup = (By.XPATH, '//div[@class="popup_box login"]')
 email_field = (By.CSS_SELECTOR, 'input[name="username"]')
 password_field = (By.ID, 'loginPassword')
 submit = (By.CSS_SELECTOR, 'input.button.cta.login.large')
-logged_surname = (By.XPATH, '//span[@class="surname" and contains(.,"Ramuk")]')
+logged_surname = (By.XPATH, '//*[contains(@class, "logged-in") and contains(.,"Ramuk")]')
 reservation_btn = (By.CSS_SELECTOR, '.header_delivery-inner.with-chevron')
+kolejna_rezerwacja = (By.XPATH, '//*[contains(@class, "button") and contains(.,"Kolejna rezerwacja")]')
 edytuj_button = (By.XPATH, '//div[@class="button secondary cta" and contains(., "Edytuj")]')
 termin_dostawy_header = (By.XPATH, '//h4[contains(.,"Wybierz termin dostawy")]')
 schedule_panel = (By.XPATH, '//div[contains(@class, "reservation-selector_section delivery-reservation-box")]')
@@ -38,12 +40,16 @@ schedule_panel = (By.XPATH, '//div[contains(@class, "reservation-selector_sectio
 
 class Frisco(BasePage):
 
+    miesiace = ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paz', 'lis', 'gru']
+
+    def get_month_no_from_text(self, month: str):
+        return Frisco.miesiace.index(month) + 1
 
     def get_page(self):
         self.get(frisco_url)
-        self.wait_until_visible(10,info_popup)
-        close_elem = self.wait_until_element_visible(5, close_info_popup)
-        close_elem.click()
+        # self.wait_until_visible(10,info_popup)
+        # close_elem = self.wait_until_element_visible(5, close_info_popup)
+        # close_elem.click()
         self.wait_until_element_visible(10, zaloguj_sie)
 
     def login(self, username, password):
@@ -60,15 +66,35 @@ class Frisco(BasePage):
     def reservation(self):
         self.wait_until_element_visible(10, reservation_btn).click()
         time.sleep(5)
-        self.wait_until_element_visible(3, edytuj_button).click()
+        # self.wait_until_element_visible(3, edytuj_button).click()
+        self.wait_until_element_visible(3, kolejna_rezerwacja).click()
         time.sleep(2)
         schedule_elem = self.wait_until_element_visible(5, schedule_panel)
         
+        self.available_dates = self.scrape_available_days()
+
+
         image = self.take_screenshot_of_element(schedule_elem)
         image_file = 'frisco_schedule.png'
         with open(image_file, 'wb') as f:
             f.write(image)
 
+    def scrape_available_days(self):
+        soup = Soup(self.page_source)
+        reservation_box = soup.find('div', {'class': 'delivery-reservation-box'})
+        month_switch = reservation_box.find('div', {'class': 'month-switcher'})
+        month, year = month_switch.text.split()[0], month_switch.text.split()[-1]
+        days = reservation_box.find('div', {'class': 'days'}).find('div', {'class': 'day active'}, partial=False)
+        available_days = [day.text for day in days] if type(days) is list else [days.text]
+        month_numeric = self.get_month_no_from_text(month)
+    
+        return [datetime.strptime(f'{day}-{month_numeric}-{year}', '%d-%m-%Y') for day in available_days]
+
+    def get_available_dates_within(self, days=10):
+        return [av_date.strftime('%d-%m-%Y') 
+                for av_date in self.available_dates
+                if av_date.date() < (datetime.now() + timedelta(days=days)).date()
+                ]
 
 
 def send_file_to_openhab(filename, hostname):
