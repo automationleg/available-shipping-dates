@@ -17,10 +17,10 @@ RUN echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/so
 
 # Update the package list and install chrome
 RUN apt-get update -y
-RUN apt-get install -y google-chrome-stable=86.0.4240.193-1
+RUN apt-get install -y google-chrome-stable=89.0.4389.90-1
 
 # Set up Chromedriver Environment variables
-ENV CHROMEDRIVER_VERSION 86.0.4240.22
+ENV CHROMEDRIVER_VERSION 89.0.4389.23
 ENV CHROMEDRIVER_DIR /chromedriver
 RUN mkdir $CHROMEDRIVER_DIR
 
