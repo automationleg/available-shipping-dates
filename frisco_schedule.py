@@ -27,9 +27,9 @@ info_popup = (By.CSS_SELECTOR, 'div.fixed-popup.image-popup')
 close_info_popup = (By.CSS_SELECTOR, 'a.close img')
 zaloguj_sie = (By.XPATH, '//*[@class="button cta" and contains(.,"Zaloguj")]')
 login_popup = (By.XPATH, '//div[@class="popup_box login"]')
-email_field = (By.CSS_SELECTOR, 'input[name="email"]')
-password_field = (By.CSS_SELECTOR, 'input[name="password"]')
-submit = (By.CSS_SELECTOR, 'button[type="button"]')
+email_field = (By.CSS_SELECTOR, 'input[name="username"]')
+password_field = (By.ID, 'loginPassword')
+submit = (By.CSS_SELECTOR, 'button[type="submit"]')
 logged_surname = (By.XPATH, '//*[contains(@class, "logged-in") and contains(.,"Ramuk")]')
 reservation_btn = (By.XPATH, '//*[contains(@class, "header-delivery")]')
 kolejna_rezerwacja = (By.XPATH, '//*[contains(@class, "button") and contains(.,"Kolejna rezerwacja")]')
@@ -54,14 +54,15 @@ class Frisco(BasePage):
 
     def login(self, username, password):
         self.wait_until_element_visible(10, zaloguj_sie).click()
-        # self.wait_until_element_visible(10, login_popup).click()        
-        email_elem = self.wait_until_element_visible(15, email_field)
-        pass_elem = self.wait_until_element_visible(10, password_field)
+        self.wait_until_element_visible(10, login_popup).click()        
+        email_elem = self.find_element(*email_field)
+        pass_elem = self.find_element(*password_field)
         email_elem.send_keys(username)
         pass_elem.send_keys(password)
 
-        self.find_element(*submit).click()
-        self.wait_until_element_visible(20, logged_surname)
+        submit_btn = self.wait_until_element_visible(5, submit)
+        submit_btn.click()
+        self.wait_until_element_visible(10, logged_surname)
 
     def reservation(self):
         self.wait_until_element_visible(10, reservation_btn).click()
